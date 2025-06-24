@@ -59,10 +59,26 @@ initialization_commands:
   - mount-s3 --version
   - sudo dnf install -y fuse3 fuse3-libs --allowerasing
   - sudo pip3 install ray
-  - sudo pip3 install projectaria-tools
+  - sudo pip3 install projectaria-tools==1.5.7
   - sudo pip3 install boto3
+  - sudo yum install -y git
 
 setup_commands:
   - sudo mkdir -p /mnt/raw
-  - sudo mount-s3 s3://rldb/raw/ /mnt/raw --allow-other
-
+  - |
+    if mountpoint -q /mnt/raw; then
+      echo "/mnt/raw is already mounted, skipping mount-s3"
+    else
+      sudo mount-s3 s3://rldb/raw/ /mnt/raw --allow-other
+    fi
+  - |
+      if [ ! -d ~/mps_pipeline ]; then
+        git clone https://github.com/ryanthecreator/mps_pipeline ~/mps_pipeline
+      else
+        git -C ~/mps_pipeline pull --ff-only
+      fi
+  - chmod +x ~/mps_pipeline/run_daily_mps.py
+  - |
+      (crontab -l 2>/dev/null | grep -v 'run_daily_mps.py'; \
+       echo "0 2 * * * /home/ec2-user/mps_pipeline/run_daily_mps.py >> /var/log/mps_daily.log 2>&1") \
+       | crontab -

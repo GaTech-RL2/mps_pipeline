@@ -1,113 +1,108 @@
 #!/usr/bin/env python3
 """
-Run Aria MPS (single-folder mode) once per task directory every time the script
-is invoked.  Designed to be launched nightly by cron/systemd on the Ray head
-node.
+run_daily_mps.py
+----------------
+  • Scans every immediate sub-directory of /mnt/raw
+  • Starts one parallel Ray task per folder:
+        aria_mps single -i <folder> --no-ui --retry-failed
+  • Designed to be launched once per night from cron, BUT
+    you can run it anytime with --debug to trigger work immediately.
 
-Usage
------
-python run_daily_mps.py            # Scan /mnt/raw/<task>     and process each one
-python run_daily_mps.py --root /mnt/raw --dry-run     # Just print what it would run
+Environment prerequisites (already in your Ray AMI/user-data):
+  * mount-s3 has mounted s3://rldb/raw → /mnt/raw
+  * projectaria-tools (aria_mps) is installed and on PATH
+  * Ray cluster is running (`ray start --head ...` done in your YAML)
 """
 
 import argparse
+import datetime as dt
 import os
 import subprocess
 import sys
+import traceback
 from pathlib import Path
-from datetime import datetime
 
-# --------------------------------------------------------------------------- #
-# Configuration                                                               #
-# --------------------------------------------------------------------------- #
+import ray
 
-DEFAULT_RAW_ROOT = Path("/mnt/raw")         # where the S3 mount lives
-TOKEN_VALUE = (
-    "FRLAbl7Eqw5g4upZCoow1ht3YE9e16ue9iLTv13IpnXXxxt8gR5BXrqkuj6deunEcnDAUMNjylAZ"
-    "AvSKzZB6PB2amlGFec8dyuvpaZAtZB0hxxzRRHgoy9gdZChM8lUDalGDP1q8VPoszMZBLiYoif0Q"
-    "9aL49Ewn0mXUEVd3gHBW74yAwZD"
+RAW_ROOT = Path("/mnt/raw")
+TOKEN = (
+    "FRLAbl7Eqw5g4upZCoow1ht3YE9e16ue9iLTv13IpnXXxxt8gR5BXrqkuj6deunEcnDAUMNjylAZAv"
+    "SKzZB6PB2amlGFec8dyuvpaZAtZB0hxxzRRHgoy9gdZChM8lUDalGDP1q8VPoszMZBLiYoif0Q9aL49"
+    "Ewn0mXUEVd3gHBW74yAwZD"
 )
-TOKEN_PATH = Path.home() / ".projectaria" / "auth_token"
-
-# --------------------------------------------------------------------------- #
-# Helpers                                                                     #
-# --------------------------------------------------------------------------- #
-
-def ensure_aria_token():
-    """Make sure ~/.projectaria/auth_token exists (for aria_mps)."""
-    if TOKEN_PATH.exists():
-        return
-    TOKEN_PATH.parent.mkdir(parents=True, exist_ok=True)
-    TOKEN_PATH.write_text(TOKEN_VALUE)
-    print(f"[INFO] Wrote token to {TOKEN_PATH}", file=sys.stderr)
 
 
-def run_mps(task_folder: Path, dry_run: bool = False) -> bool:
-    """
-    Execute `aria_mps single -i <task_folder>`.
+def ensure_token():
+    dst = Path.home() / ".projectaria" / "auth_token"
+    if not dst.exists():
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        dst.write_text(TOKEN)
 
-    Returns True on success, False otherwise.
-    """
-    cmd = [
-        "aria_mps",
-        "single",
-        "-i",
-        str(task_folder),
-        "--no-ui",
-        "--retry-failed",
-    ]
-    if dry_run:
-        print("[DRY-RUN]", " ".join(cmd))
-        return True
 
-    print(f"[{datetime.utcnow().isoformat()}] Running MPS on {task_folder}")
+@ray.remote
+def run_mps_on_folder(folder: str) -> dict:
+    """Executes aria_mps for a given folder. Returns status dict."""
     try:
+        ensure_token()
+        cmd = ["aria_mps", "single", "-i", folder, "--no-ui", "--retry-failed"]
         subprocess.run(cmd, check=True)
-        print(f"[OK]   {task_folder}")
-        return True
-    except subprocess.CalledProcessError as exc:
-        print(f"[ERR]  {task_folder}: {exc}", file=sys.stderr)
-        return False
+        return {"folder": folder, "status": "ok"}
+    except Exception as exc:
+        return {
+            "folder": folder,
+            "status": "error",
+            "error": f"{exc}",
+            "trace": traceback.format_exc(limit=3),
+        }
 
 
-def discover_task_folders(raw_root: Path):
-    """
-    Yield every immediate sub-directory of `raw_root`
-    that contains at least one *.vrs file.
-    """
-    for child in sorted(raw_root.iterdir()):
-        if child.is_dir() and any(child.glob("*.vrs")):
-            yield child
+def discover_subfolders() -> list[str]:
+    """Immediate sub-directories inside RAW_ROOT (skip files)."""
+    if not RAW_ROOT.exists():
+        raise RuntimeError(f"{RAW_ROOT} does not exist or is not mounted?")
+    return [str(p) for p in RAW_ROOT.iterdir() if p.is_dir()]
 
 
-# --------------------------------------------------------------------------- #
-# Main                                                                        #
-# --------------------------------------------------------------------------- #
+def launch_jobs(folders: list[str]) -> None:
+    """Fire Ray tasks & stream unordered results."""
+    if not folders:
+        print("Nothing to do – 0 sub-folders found.")
+        return
+    print(f"Launching {len(folders)} parallel MPS jobs…")
+    # Start tasks
+    futures = [run_mps_on_folder.remote(f) for f in folders]
+    remaining = set(futures)
+    while remaining:
+        ready, remaining = ray.wait(list(remaining), num_returns=1, timeout=None)
+        res = ray.get(ready[0])
+        ts = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        if res["status"] == "ok":
+            print(f"[{ts}] ✓ {res['folder']}")
+        else:
+            print(f"[{ts}] ✗ {res['folder']} :: {res['error']}")
+            print(res["trace"])
 
-def main():
+
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--root",
-        type=Path,
-        default=DEFAULT_RAW_ROOT,
-        help="Top-level directory that contains task subfolders (default: /mnt/raw)",
+        "--debug",
+        action="store_true",
+        help="Run immediately instead of exiting if not between 00:00-02:00",
     )
-    parser.add_argument("--dry-run", action="store_true", help="Print what would run")
     args = parser.parse_args()
 
-    if not args.root.is_dir():
-        print(f"[FATAL] Raw root {args.root} does not exist or is not a directory",
-              file=sys.stderr)
-        sys.exit(1)
+    # In “cron mode” we only work between 00:00-02:00 local time.
+    if not args.debug:
+        hour = dt.datetime.now().hour
+        if hour not in (0, 1):  # outside window → exit quietly
+            sys.exit(0)
 
-    ensure_aria_token()
+    # Connect to the local Ray cluster (running on the head node)
+    ray.init(address="auto")
 
-    any_failed = False
-    for task_dir in discover_task_folders(args.root):
-        if not run_mps(task_dir, dry_run=args.dry_run):
-            any_failed = True
-
-    sys.exit(1 if any_failed else 0)
+    folders = discover_subfolders()
+    launch_jobs(folders)
 
 
 if __name__ == "__main__":
