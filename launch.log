@@ -1,0 +1,249 @@
+Cluster: mps-ray
+
+Checking AWS environment settings
+Creating AWS resource `ec2` in `us-east-2`
+Creating AWS resource `ec2` in `us-east-2`
+AWS config
+  IAM Profile: ray-mps-profile
+  EC2 Key pair (all available node types): ray-mps-key
+  VPC Subnets (all available node types): subnet-02fbc81414d827515 [default]
+  EC2 Security groups (all available node types): sg-01cabcd4f45211888
+  EC2 AMI (all available node types): ami-06971c49acd687c30
+
+Creating AWS resource `ec2` in `us-east-2`
+Updating cluster configuration and running full setup.
+Cluster Ray runtime will be restarted. Confirm [y/N]: Warning: Permanently added '3.138.60.40' (ED25519) to the list of known hosts.
+ 22:20:18 up 1 day, 22:47,  1 user,  load average: 0.00, 0.00, 0.00
+Shared connection to 3.138.60.40 closed.
+
+Usage stats collection is enabled. To disable this, add `--disable-usage-stats` to the command that starts the cluster, or run the following command: `ray disable-usage-stats` before starting the cluster. See https://docs.ray.io/en/master/cluster/usage-stats.html for more details.
+
+<1/1> Setting up head node
+  Prepared bootstrap config
+  New status: waiting-for-ssh
+  [1/7] Waiting for SSH to become available
+    Running `uptime` as a test.
+    Fetched IP: 3.138.60.40
+    Running `uptime`
+Shared connection to 3.138.60.40 closed.
+    Success.
+  Creating AWS resource `ssm` in `us-east-2`
+  Creating AWS client `ssm` in `us-east-2`
+  Creating AWS resource `cloudwatch` in `us-east-2`
+  Updating cluster configuration. [hash=fe88fb11acc52a1d87dc3fa65871f7addb9c11d3]
+  New status: syncing-files
+  [2/7] Processing file mounts
+    Running `mkdir -p ~`
+Transfer starting: 1 files
+ray-bootstrap-wr1u82oi
+
+sent 160 bytes  received 72 bytes  1049 bytes/sec
+total size is 2825  speedup is 12.18
+    Running `rsync --rsh ssh -i ~/.ssh/ray-mps-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o ExitOnForwardFailure=yes -o ServerAliveInterval=5 -o ServerAliveCountMax=3 -o ControlMaster=auto -o ControlPath=/tmp/ray_ssh_ec0902d93d/910dc28b10/%C -o ControlPersist=10s -o ConnectTimeout=120s -avz /var/folders/wt/xp7kwn313vb333vs4ksqk6600000gr/T/ray-bootstrap-wr1u82oi ec2-user@3.138.60.40:~/ray_bootstrap_config.yaml`
+Shared connection to 3.138.60.40 closed.
+    `rsync`ed /var/folders/wt/xp7kwn313vb333vs4ksqk6600000gr/T/ray-bootstrap-wr1u82oi (local) to ~/ray_bootstrap_config.yaml (remote)
+    ~/ray_bootstrap_config.yaml from /var/folders/wt/xp7kwn313vb333vs4ksqk6600000gr/T/ray-bootstrap-wr1u82oi
+    Running `mkdir -p ~`
+Transfer starting: 1 files
+
+sent 89 bytes  received 20 bytes  502 bytes/sec
+total size is 1675  speedup is 15.37
+    Running `rsync --rsh ssh -i ~/.ssh/ray-mps-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -o ExitOnForwardFailure=yes -o ServerAliveInterval=5 -o ServerAliveCountMax=3 -o ControlMaster=auto -o ControlPath=/tmp/ray_ssh_ec0902d93d/910dc28b10/%C -o ControlPersist=10s -o ConnectTimeout=120s -avz /Users/ryanp/.ssh/ray-mps-key.pem ec2-user@3.138.60.40:~/ray_bootstrap_key.pem`
+Warning: Permanently added '3.138.60.40' (ED25519) to the list of known hosts.
+Last metadata expiration check: 1 day, 22:40:32 ago on Mon Jun 16 23:39:52 2025.
+Package git-2.47.1-1.amzn2023.0.3.x86_64 is already installed.
+Package fuse-2.9.9-13.amzn2023.0.2.x86_64 is already installed.
+Package python3-3.9.22-1.amzn2023.0.1.x86_64 is already installed.
+Package python3-devel-3.9.22-1.amzn2023.0.1.x86_64 is already installed.
+Package gcc-11.5.0-5.amzn2023.0.4.x86_64 is already installed.
+Package gcc-c++-11.5.0-5.amzn2023.0.4.x86_64 is already installed.
+Dependencies resolved.
+Nothing to do.
+Complete!
+Connection to 3.138.60.40 closed.
+    `rsync`ed /Users/ryanp/.ssh/ray-mps-key.pem (local) to ~/ray_bootstrap_key.pem (remote)
+    ~/ray_bootstrap_key.pem from /Users/ryanp/.ssh/ray-mps-key.pem
+  [3/7] No worker file mounts to sync
+  New status: setting-up
+  [4/7] Running initialization commands
+    Running `sudo yum -y install git fuse python3 python3-devel gcc g++`
+Warning: Permanently added '3.138.60.40' (ED25519) to the list of known hosts.
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100     9  100     9    0     0     72      0 --:--:-- --:--:-- --:--:--    73
+Connection to 3.138.60.40 closed.
+    Running `sudo curl -L -o /usr/local/bin/mount-s3 https://github.com/awslabs/mountpoint-s3/releases/download/v1.0.1/mount-s3-linux-amd64`
+Warning: Permanently added '3.138.60.40' (ED25519) to the list of known hosts.
+Connection to 3.138.60.40 closed.
+    Running `sudo chmod +x /usr/local/bin/mount-s3`
+Warning: Permanently added '3.138.60.40' (ED25519) to the list of known hosts.
+Connection to 3.138.60.40 closed.
+    Running `python3 -m venv ~/aria_venv`
+Warning: Permanently added '3.138.60.40' (ED25519) to the list of known hosts.
+Requirement already satisfied: pip in ./aria_venv/lib/python3.9/site-packages (25.1.1)
+Connection to 3.138.60.40 closed.
+    Running `. ~/aria_venv/bin/activate && pip install --upgrade pip`
+Warning: Permanently added '3.138.60.40' (ED25519) to the list of known hosts.
+Requirement already satisfied: boto3 in ./aria_venv/lib/python3.9/site-packages (1.38.37)
+Requirement already satisfied: ray in ./aria_venv/lib/python3.9/site-packages (2.47.0)
+Requirement already satisfied: projectaria-tools[all] in ./aria_venv/lib/python3.9/site-packages (1.6.0)
+Requirement already satisfied: numpy in ./aria_venv/lib/python3.9/site-packages (from projectaria-tools[all]) (2.0.2)
+Requirement already satisfied: requests in ./aria_venv/lib/python3.9/site-packages (from projectaria-tools[all]) (2.32.4)
+Requirement already satisfied: rerun-sdk>=0.20.0 in ./aria_venv/lib/python3.9/site-packages (from projectaria-tools[all]) (0.23.3)
+Requirement already satisfied: tqdm in ./aria_venv/lib/python3.9/site-packages (from projectaria-tools[all]) (4.67.1)
+Requirement already satisfied: jupyter in ./aria_venv/lib/python3.9/site-packages (from projectaria-tools[all]) (1.1.1)
+Requirement already satisfied: matplotlib in ./aria_venv/lib/python3.9/site-packages (from projectaria-tools[all]) (3.9.4)
+Requirement already satisfied: pandas in ./aria_venv/lib/python3.9/site-packages (from projectaria-tools[all]) (2.3.0)
+Requirement already satisfied: pillow in ./aria_venv/lib/python3.9/site-packages (from projectaria-tools[all]) (11.2.1)
+Requirement already satisfied: plotly in ./aria_venv/lib/python3.9/site-packages (from projectaria-tools[all]) (6.1.2)
+Requirement already satisfied: scipy in ./aria_venv/lib/python3.9/site-packages (from projectaria-tools[all]) (1.13.1)
+Requirement already satisfied: moviepy==1.0.3 in ./aria_venv/lib/python3.9/site-packages (from projectaria-tools[all]) (1.0.3)
+Requirement already satisfied: decorator<5.0,>=4.0.2 in ./aria_venv/lib/python3.9/site-packages (from moviepy==1.0.3->projectaria-tools[all]) (4.4.2)
+Requirement already satisfied: imageio<3.0,>=2.5 in ./aria_venv/lib/python3.9/site-packages (from moviepy==1.0.3->projectaria-tools[all]) (2.37.0)
+Requirement already satisfied: imageio_ffmpeg>=0.2.0 in ./aria_venv/lib/python3.9/site-packages (from moviepy==1.0.3->projectaria-tools[all]) (0.6.0)
+Requirement already satisfied: proglog<=1.0.0 in ./aria_venv/lib/python3.9/site-packages (from moviepy==1.0.3->projectaria-tools[all]) (0.1.12)
+Requirement already satisfied: charset_normalizer<4,>=2 in ./aria_venv/lib/python3.9/site-packages (from requests->projectaria-tools[all]) (3.4.2)
+Requirement already satisfied: idna<4,>=2.5 in ./aria_venv/lib/python3.9/site-packages (from requests->projectaria-tools[all]) (3.10)
+Requirement already satisfied: urllib3<3,>=1.21.1 in ./aria_venv/lib/python3.9/site-packages (from requests->projectaria-tools[all]) (1.26.20)
+Requirement already satisfied: certifi>=2017.4.17 in ./aria_venv/lib/python3.9/site-packages (from requests->projectaria-tools[all]) (2025.6.15)
+Requirement already satisfied: botocore<1.39.0,>=1.38.37 in ./aria_venv/lib/python3.9/site-packages (from boto3) (1.38.37)
+Requirement already satisfied: jmespath<2.0.0,>=0.7.1 in ./aria_venv/lib/python3.9/site-packages (from boto3) (1.0.1)
+Requirement already satisfied: s3transfer<0.14.0,>=0.13.0 in ./aria_venv/lib/python3.9/site-packages (from boto3) (0.13.0)
+Requirement already satisfied: python-dateutil<3.0.0,>=2.1 in ./aria_venv/lib/python3.9/site-packages (from botocore<1.39.0,>=1.38.37->boto3) (2.9.0.post0)
+Requirement already satisfied: six>=1.5 in ./aria_venv/lib/python3.9/site-packages (from python-dateutil<3.0.0,>=2.1->botocore<1.39.0,>=1.38.37->boto3) (1.17.0)
+Requirement already satisfied: click>=7.0 in ./aria_venv/lib/python3.9/site-packages (from ray) (8.1.8)
+Requirement already satisfied: filelock in ./aria_venv/lib/python3.9/site-packages (from ray) (3.18.0)
+Requirement already satisfied: jsonschema in ./aria_venv/lib/python3.9/site-packages (from ray) (4.24.0)
+Requirement already satisfied: msgpack<2.0.0,>=1.0.0 in ./aria_venv/lib/python3.9/site-packages (from ray) (1.1.1)
+Requirement already satisfied: packaging in ./aria_venv/lib/python3.9/site-packages (from ray) (25.0)
+Requirement already satisfied: protobuf!=3.19.5,>=3.15.3 in ./aria_venv/lib/python3.9/site-packages (from ray) (6.31.1)
+Requirement already satisfied: pyyaml in ./aria_venv/lib/python3.9/site-packages (from ray) (6.0.2)
+Requirement already satisfied: attrs>=23.1.0 in ./aria_venv/lib/python3.9/site-packages (from rerun-sdk>=0.20.0->projectaria-tools[all]) (25.3.0)
+Requirement already satisfied: pyarrow>=18.0.0 in ./aria_venv/lib/python3.9/site-packages (from rerun-sdk>=0.20.0->projectaria-tools[all]) (20.0.0)
+Requirement already satisfied: typing-extensions>=4.5 in ./aria_venv/lib/python3.9/site-packages (from rerun-sdk>=0.20.0->projectaria-tools[all]) (4.14.0)
+Requirement already satisfied: jsonschema-specifications>=2023.03.6 in ./aria_venv/lib/python3.9/site-packages (from jsonschema->ray) (2025.4.1)
+Requirement already satisfied: referencing>=0.28.4 in ./aria_venv/lib/python3.9/site-packages (from jsonschema->ray) (0.36.2)
+Requirement already satisfied: rpds-py>=0.7.1 in ./aria_venv/lib/python3.9/site-packages (from jsonschema->ray) (0.25.1)
+Requirement already satisfied: notebook in ./aria_venv/lib/python3.9/site-packages (from jupyter->projectaria-tools[all]) (7.4.3)
+Requirement already satisfied: jupyter-console in ./aria_venv/lib/python3.9/site-packages (from jupyter->projectaria-tools[all]) (6.6.3)
+Requirement already satisfied: nbconvert in ./aria_venv/lib/python3.9/site-packages (from jupyter->projectaria-tools[all]) (7.16.6)
+Requirement already satisfied: ipykernel in ./aria_venv/lib/python3.9/site-packages (from jupyter->projectaria-tools[all]) (6.29.5)
+Requirement already satisfied: ipywidgets in ./aria_venv/lib/python3.9/site-packages (from jupyter->projectaria-tools[all]) (8.1.7)
+Requirement already satisfied: jupyterlab in ./aria_venv/lib/python3.9/site-packages (from jupyter->projectaria-tools[all]) (4.4.3)
+Requirement already satisfied: comm>=0.1.1 in ./aria_venv/lib/python3.9/site-packages (from ipykernel->jupyter->projectaria-tools[all]) (0.2.2)
+Requirement already satisfied: debugpy>=1.6.5 in ./aria_venv/lib/python3.9/site-packages (from ipykernel->jupyter->projectaria-tools[all]) (1.8.14)
+Requirement already satisfied: ipython>=7.23.1 in ./aria_venv/lib/python3.9/site-packages (from ipykernel->jupyter->projectaria-tools[all]) (8.18.1)
+Requirement already satisfied: jupyter-client>=6.1.12 in ./aria_venv/lib/python3.9/site-packages (from ipykernel->jupyter->projectaria-tools[all]) (8.6.3)
+Requirement already satisfied: jupyter-core!=5.0.*,>=4.12 in ./aria_venv/lib/python3.9/site-packages (from ipykernel->jupyter->projectaria-tools[all]) (5.8.1)
+Requirement already satisfied: matplotlib-inline>=0.1 in ./aria_venv/lib/python3.9/site-packages (from ipykernel->jupyter->projectaria-tools[all]) (0.1.7)
+Requirement already satisfied: nest-asyncio in ./aria_venv/lib/python3.9/site-packages (from ipykernel->jupyter->projectaria-tools[all]) (1.6.0)
+Requirement already satisfied: psutil in ./aria_venv/lib/python3.9/site-packages (from ipykernel->jupyter->projectaria-tools[all]) (7.0.0)
+Requirement already satisfied: pyzmq>=24 in ./aria_venv/lib/python3.9/site-packages (from ipykernel->jupyter->projectaria-tools[all]) (27.0.0)
+Requirement already satisfied: tornado>=6.1 in ./aria_venv/lib/python3.9/site-packages (from ipykernel->jupyter->projectaria-tools[all]) (6.5.1)
+Requirement already satisfied: traitlets>=5.4.0 in ./aria_venv/lib/python3.9/site-packages (from ipykernel->jupyter->projectaria-tools[all]) (5.14.3)
+Requirement already satisfied: jedi>=0.16 in ./aria_venv/lib/python3.9/site-packages (from ipython>=7.23.1->ipykernel->jupyter->projectaria-tools[all]) (0.19.2)
+Requirement already satisfied: prompt-toolkit<3.1.0,>=3.0.41 in ./aria_venv/lib/python3.9/site-packages (from ipython>=7.23.1->ipykernel->jupyter->projectaria-tools[all]) (3.0.51)
+Requirement already satisfied: pygments>=2.4.0 in ./aria_venv/lib/python3.9/site-packages (from ipython>=7.23.1->ipykernel->jupyter->projectaria-tools[all]) (2.19.1)
+Requirement already satisfied: stack-data in ./aria_venv/lib/python3.9/site-packages (from ipython>=7.23.1->ipykernel->jupyter->projectaria-tools[all]) (0.6.3)
+Requirement already satisfied: exceptiongroup in ./aria_venv/lib/python3.9/site-packages (from ipython>=7.23.1->ipykernel->jupyter->projectaria-tools[all]) (1.3.0)
+Requirement already satisfied: pexpect>4.3 in ./aria_venv/lib/python3.9/site-packages (from ipython>=7.23.1->ipykernel->jupyter->projectaria-tools[all]) (4.9.0)
+Requirement already satisfied: wcwidth in ./aria_venv/lib/python3.9/site-packages (from prompt-toolkit<3.1.0,>=3.0.41->ipython>=7.23.1->ipykernel->jupyter->projectaria-tools[all]) (0.2.13)
+Requirement already satisfied: parso<0.9.0,>=0.8.4 in ./aria_venv/lib/python3.9/site-packages (from jedi>=0.16->ipython>=7.23.1->ipykernel->jupyter->projectaria-tools[all]) (0.8.4)
+Requirement already satisfied: importlib-metadata>=4.8.3 in ./aria_venv/lib/python3.9/site-packages (from jupyter-client>=6.1.12->ipykernel->jupyter->projectaria-tools[all]) (8.7.0)
+Requirement already satisfied: zipp>=3.20 in ./aria_venv/lib/python3.9/site-packages (from importlib-metadata>=4.8.3->jupyter-client>=6.1.12->ipykernel->jupyter->projectaria-tools[all]) (3.23.0)
+Requirement already satisfied: platformdirs>=2.5 in ./aria_venv/lib/python3.9/site-packages (from jupyter-core!=5.0.*,>=4.12->ipykernel->jupyter->projectaria-tools[all]) (4.3.8)
+Requirement already satisfied: ptyprocess>=0.5 in ./aria_venv/lib/python3.9/site-packages (from pexpect>4.3->ipython>=7.23.1->ipykernel->jupyter->projectaria-tools[all]) (0.7.0)
+Requirement already satisfied: widgetsnbextension~=4.0.14 in ./aria_venv/lib/python3.9/site-packages (from ipywidgets->jupyter->projectaria-tools[all]) (4.0.14)
+Requirement already satisfied: jupyterlab_widgets~=3.0.15 in ./aria_venv/lib/python3.9/site-packages (from ipywidgets->jupyter->projectaria-tools[all]) (3.0.15)
+Requirement already satisfied: async-lru>=1.0.0 in ./aria_venv/lib/python3.9/site-packages (from jupyterlab->jupyter->projectaria-tools[all]) (2.0.5)
+Requirement already satisfied: httpx>=0.25.0 in ./aria_venv/lib/python3.9/site-packages (from jupyterlab->jupyter->projectaria-tools[all]) (0.28.1)
+Requirement already satisfied: jinja2>=3.0.3 in ./aria_venv/lib/python3.9/site-packages (from jupyterlab->jupyter->projectaria-tools[all]) (3.1.6)
+Requirement already satisfied: jupyter-lsp>=2.0.0 in ./aria_venv/lib/python3.9/site-packages (from jupyterlab->jupyter->projectaria-tools[all]) (2.2.5)
+Requirement already satisfied: jupyter-server<3,>=2.4.0 in ./aria_venv/lib/python3.9/site-packages (from jupyterlab->jupyter->projectaria-tools[all]) (2.16.0)
+Requirement already satisfied: jupyterlab-server<3,>=2.27.1 in ./aria_venv/lib/python3.9/site-packages (from jupyterlab->jupyter->projectaria-tools[all]) (2.27.3)
+Requirement already satisfied: notebook-shim>=0.2 in ./aria_venv/lib/python3.9/site-packages (from jupyterlab->jupyter->projectaria-tools[all]) (0.2.4)
+Requirement already satisfied: setuptools>=41.1.0 in ./aria_venv/lib/python3.9/site-packages (from jupyterlab->jupyter->projectaria-tools[all]) (59.6.0)
+Requirement already satisfied: tomli>=1.2.2 in ./aria_venv/lib/python3.9/site-packages (from jupyterlab->jupyter->projectaria-tools[all]) (2.2.1)
+Requirement already satisfied: anyio>=3.1.0 in ./aria_venv/lib/python3.9/site-packages (from jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (4.9.0)
+Requirement already satisfied: argon2-cffi>=21.1 in ./aria_venv/lib/python3.9/site-packages (from jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (25.1.0)
+Requirement already satisfied: jupyter-events>=0.11.0 in ./aria_venv/lib/python3.9/site-packages (from jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (0.12.0)
+Requirement already satisfied: jupyter-server-terminals>=0.4.4 in ./aria_venv/lib/python3.9/site-packages (from jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (0.5.3)
+Requirement already satisfied: nbformat>=5.3.0 in ./aria_venv/lib/python3.9/site-packages (from jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (5.10.4)
+Requirement already satisfied: overrides>=5.0 in ./aria_venv/lib/python3.9/site-packages (from jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (7.7.0)
+Requirement already satisfied: prometheus-client>=0.9 in ./aria_venv/lib/python3.9/site-packages (from jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (0.22.1)
+Requirement already satisfied: send2trash>=1.8.2 in ./aria_venv/lib/python3.9/site-packages (from jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (1.8.3)
+Requirement already satisfied: terminado>=0.8.3 in ./aria_venv/lib/python3.9/site-packages (from jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (0.18.1)
+Requirement already satisfied: websocket-client>=1.7 in ./aria_venv/lib/python3.9/site-packages (from jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (1.8.0)
+Requirement already satisfied: babel>=2.10 in ./aria_venv/lib/python3.9/site-packages (from jupyterlab-server<3,>=2.27.1->jupyterlab->jupyter->projectaria-tools[all]) (2.17.0)
+Requirement already satisfied: json5>=0.9.0 in ./aria_venv/lib/python3.9/site-packages (from jupyterlab-server<3,>=2.27.1->jupyterlab->jupyter->projectaria-tools[all]) (0.12.0)
+Requirement already satisfied: sniffio>=1.1 in ./aria_venv/lib/python3.9/site-packages (from anyio>=3.1.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (1.3.1)
+Requirement already satisfied: argon2-cffi-bindings in ./aria_venv/lib/python3.9/site-packages (from argon2-cffi>=21.1->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (21.2.0)
+Requirement already satisfied: httpcore==1.* in ./aria_venv/lib/python3.9/site-packages (from httpx>=0.25.0->jupyterlab->jupyter->projectaria-tools[all]) (1.0.9)
+Requirement already satisfied: h11>=0.16 in ./aria_venv/lib/python3.9/site-packages (from httpcore==1.*->httpx>=0.25.0->jupyterlab->jupyter->projectaria-tools[all]) (0.16.0)
+Requirement already satisfied: MarkupSafe>=2.0 in ./aria_venv/lib/python3.9/site-packages (from jinja2>=3.0.3->jupyterlab->jupyter->projectaria-tools[all]) (3.0.2)
+Requirement already satisfied: python-json-logger>=2.0.4 in ./aria_venv/lib/python3.9/site-packages (from jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (3.3.0)
+Requirement already satisfied: rfc3339-validator in ./aria_venv/lib/python3.9/site-packages (from jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (0.1.4)
+Requirement already satisfied: rfc3986-validator>=0.1.1 in ./aria_venv/lib/python3.9/site-packages (from jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (0.1.1)
+Requirement already satisfied: fqdn in ./aria_venv/lib/python3.9/site-packages (from jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (1.5.1)
+Requirement already satisfied: isoduration in ./aria_venv/lib/python3.9/site-packages (from jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (20.11.0)
+Requirement already satisfied: jsonpointer>1.13 in ./aria_venv/lib/python3.9/site-packages (from jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (3.0.0)
+Requirement already satisfied: uri-template in ./aria_venv/lib/python3.9/site-packages (from jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (1.3.0)
+Requirement already satisfied: webcolors>=24.6.0 in ./aria_venv/lib/python3.9/site-packages (from jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (24.11.1)
+Requirement already satisfied: beautifulsoup4 in ./aria_venv/lib/python3.9/site-packages (from nbconvert->jupyter->projectaria-tools[all]) (4.13.4)
+Requirement already satisfied: bleach!=5.0.0 in ./aria_venv/lib/python3.9/site-packages (from bleach[css]!=5.0.0->nbconvert->jupyter->projectaria-tools[all]) (6.2.0)
+Requirement already satisfied: defusedxml in ./aria_venv/lib/python3.9/site-packages (from nbconvert->jupyter->projectaria-tools[all]) (0.7.1)
+Requirement already satisfied: jupyterlab-pygments in ./aria_venv/lib/python3.9/site-packages (from nbconvert->jupyter->projectaria-tools[all]) (0.3.0)
+Requirement already satisfied: mistune<4,>=2.0.3 in ./aria_venv/lib/python3.9/site-packages (from nbconvert->jupyter->projectaria-tools[all]) (3.1.3)
+Requirement already satisfied: nbclient>=0.5.0 in ./aria_venv/lib/python3.9/site-packages (from nbconvert->jupyter->projectaria-tools[all]) (0.10.2)
+Requirement already satisfied: pandocfilters>=1.4.1 in ./aria_venv/lib/python3.9/site-packages (from nbconvert->jupyter->projectaria-tools[all]) (1.5.1)
+Requirement already satisfied: webencodings in ./aria_venv/lib/python3.9/site-packages (from bleach!=5.0.0->bleach[css]!=5.0.0->nbconvert->jupyter->projectaria-tools[all]) (0.5.1)
+Requirement already satisfied: tinycss2<1.5,>=1.1.0 in ./aria_venv/lib/python3.9/site-packages (from bleach[css]!=5.0.0->nbconvert->jupyter->projectaria-tools[all]) (1.4.0)
+Requirement already satisfied: fastjsonschema>=2.15 in ./aria_venv/lib/python3.9/site-packages (from nbformat>=5.3.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (2.21.1)
+Requirement already satisfied: cffi>=1.0.1 in ./aria_venv/lib/python3.9/site-packages (from argon2-cffi-bindings->argon2-cffi>=21.1->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (1.17.1)
+Requirement already satisfied: pycparser in ./aria_venv/lib/python3.9/site-packages (from cffi>=1.0.1->argon2-cffi-bindings->argon2-cffi>=21.1->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (2.22)
+Requirement already satisfied: soupsieve>1.2 in ./aria_venv/lib/python3.9/site-packages (from beautifulsoup4->nbconvert->jupyter->projectaria-tools[all]) (2.7)
+Requirement already satisfied: arrow>=0.15.0 in ./aria_venv/lib/python3.9/site-packages (from isoduration->jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (1.3.0)
+Requirement already satisfied: types-python-dateutil>=2.8.10 in ./aria_venv/lib/python3.9/site-packages (from arrow>=0.15.0->isoduration->jsonschema[format-nongpl]>=4.18.0->jupyter-events>=0.11.0->jupyter-server<3,>=2.4.0->jupyterlab->jupyter->projectaria-tools[all]) (2.9.0.20250516)
+Requirement already satisfied: contourpy>=1.0.1 in ./aria_venv/lib/python3.9/site-packages (from matplotlib->projectaria-tools[all]) (1.3.0)
+Requirement already satisfied: cycler>=0.10 in ./aria_venv/lib/python3.9/site-packages (from matplotlib->projectaria-tools[all]) (0.12.1)
+Requirement already satisfied: fonttools>=4.22.0 in ./aria_venv/lib/python3.9/site-packages (from matplotlib->projectaria-tools[all]) (4.58.4)
+Requirement already satisfied: kiwisolver>=1.3.1 in ./aria_venv/lib/python3.9/site-packages (from matplotlib->projectaria-tools[all]) (1.4.7)
+Requirement already satisfied: pyparsing>=2.3.1 in ./aria_venv/lib/python3.9/site-packages (from matplotlib->projectaria-tools[all]) (3.2.3)
+Requirement already satisfied: importlib-resources>=3.2.0 in ./aria_venv/lib/python3.9/site-packages (from matplotlib->projectaria-tools[all]) (6.5.2)
+Requirement already satisfied: pytz>=2020.1 in ./aria_venv/lib/python3.9/site-packages (from pandas->projectaria-tools[all]) (2025.2)
+Requirement already satisfied: tzdata>=2022.7 in ./aria_venv/lib/python3.9/site-packages (from pandas->projectaria-tools[all]) (2025.2)
+Requirement already satisfied: narwhals>=1.15.1 in ./aria_venv/lib/python3.9/site-packages (from plotly->projectaria-tools[all]) (1.43.0)
+Requirement already satisfied: executing>=1.2.0 in ./aria_venv/lib/python3.9/site-packages (from stack-data->ipython>=7.23.1->ipykernel->jupyter->projectaria-tools[all]) (2.2.0)
+Requirement already satisfied: asttokens>=2.1.0 in ./aria_venv/lib/python3.9/site-packages (from stack-data->ipython>=7.23.1->ipykernel->jupyter->projectaria-tools[all]) (3.0.0)
+Requirement already satisfied: pure-eval in ./aria_venv/lib/python3.9/site-packages (from stack-data->ipython>=7.23.1->ipykernel->jupyter->projectaria-tools[all]) (0.2.3)
+Connection to 3.138.60.40 closed.
+    Running `. ~/aria_venv/bin/activate && pip install 'projectaria-tools[all]' boto3 ray`
+Warning: Permanently added '3.138.60.40' (ED25519) to the list of known hosts.
+Shared connection to 3.138.60.40 closed.
+  [5/7] Initializing command runner
+  [6/7] Running setup commands
+    (0/3) sudo mkdir -p /mnt/raw && sudo chown ec2-user /mnt/raw
+    Running `sudo mkdir -p /mnt/raw && sudo chown ec2-user /mnt/raw`
+/usr/local/bin/mount-s3: line 1: Not: command not found
+Shared connection to 3.138.60.40 closed.
+    (1/3) sudo /usr/local/bin/mount-s3 \ s3://rldb/raw /mnt/raw \ -o allow_other,max_concurrency=20
+    Running `sudo /usr/local/bin/mount-s3 \ s3://rldb/raw /mnt/raw \ -o allow_other,max_concurrency=20`
+  Failed to setup head node.
+  New status: update-failed
+  !!!
+  Exception details: {'show_color': None, 'message': 'SSH command failed.'}
+  Full traceback: Traceback (most recent call last):
+  File "/Users/ryanp/miniconda3/lib/python3.12/site-packages/ray/autoscaler/_private/updater.py", line 166, in run
+    self.do_update()
+  File "/Users/ryanp/miniconda3/lib/python3.12/site-packages/ray/autoscaler/_private/updater.py", line 490, in do_update
+    self.cmd_runner.run(cmd, run_env="auto")
+  File "/Users/ryanp/miniconda3/lib/python3.12/site-packages/ray/autoscaler/_private/command_runner.py", line 384, in run
+    return self._run_helper(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/ryanp/miniconda3/lib/python3.12/site-packages/ray/autoscaler/_private/command_runner.py", line 303, in _run_helper
+    raise click.ClickException(fail_msg) from None
+click.exceptions.ClickException: SSH command failed.
+
+  Error message: SSH command failed.
+  !!!
+  
