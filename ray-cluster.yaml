@@ -66,11 +66,11 @@ initialization_commands:
 setup_commands:
   - sudo mkdir -p /mnt/raw
   - |
-    if mountpoint -q /mnt/raw; then
-      echo "/mnt/raw is already mounted, skipping mount-s3"
-    else
-      sudo mount-s3 s3://rldb/raw/ /mnt/raw --allow-other
-    fi
+      if mountpoint -q /mnt/raw; then
+        echo "/mnt/raw already mounted"
+      else
+        sudo mount-s3 s3://rldb/raw/ /mnt/raw --allow-other
+      fi
   - |
       if [ ! -d ~/mps_pipeline ]; then
         git clone https://github.com/ryanthecreator/mps_pipeline ~/mps_pipeline
@@ -78,7 +78,10 @@ setup_commands:
         git -C ~/mps_pipeline pull --ff-only
       fi
   - chmod +x ~/mps_pipeline/run_daily_mps.py
+  - sudo dnf install -y cronie
+  - sudo systemctl enable --now crond
   - |
-      (crontab -l 2>/dev/null | grep -v 'run_daily_mps.py'; \
-       echo "0 2 * * * /home/ec2-user/mps_pipeline/run_daily_mps.py >> /var/log/mps_daily.log 2>&1") \
+      (crontab -l 2>/dev/null | grep -v run_daily_mps.py ; \
+       echo "0 2 * * * PATH=/usr/local/bin:/usr/bin:/bin /usr/bin/python3 /home/ec2-user/mps_pipeline/run_daily_mps.py >> /var/log/mps_daily.log 2>&1") \
        | crontab -
+  - crontab -l
