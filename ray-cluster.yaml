@@ -55,11 +55,11 @@ initialization_commands:
   - sudo curl -O https://bootstrap.pypa.io/get-pip.py
   - sudo python3 get-pip.py
   - wget https://s3.amazonaws.com/mountpoint-s3-release/latest/x86_64/mount-s3.rpm
-  - sudo yum install ./mount-s3.rpm
+  - sudo yum install -y ./mount-s3.rpm
   - mount-s3 --version
   - sudo dnf install -y fuse3 fuse3-libs --allowerasing
   - sudo pip3 install ray
-  - sudo pip3 install projectaria-tools==1.5.7
+  - sudo pip3 install projectaria-tools
   - sudo pip3 install boto3
   - sudo yum install -y git
 
@@ -69,7 +69,12 @@ setup_commands:
       if mountpoint -q /mnt/raw; then
         echo "/mnt/raw already mounted"
       else
-        sudo mount-s3 s3://rldb/raw/ /mnt/raw --allow-other
+        sudo mount-s3 \
+          s3://rldb/raw/ /mnt/raw \
+          --allow-other \
+          --uid=$(id -u ec2-user) \
+          --gid=$(id -g ec2-user) \
+          --file-mode=664 --dir-mode=775
       fi
   - |
       if [ ! -d ~/mps_pipeline ]; then
