@@ -39,7 +39,7 @@ def ensure_token():
         dst.write_text(TOKEN)
 
 
-@ray.remote
+@ray.remote(num_cpus=1, memory=8 * 1024 ** 3)
 def run_mps_on_folder(folder: str) -> dict:
     """Executes aria_mps for a given folder. Returns status dict."""
     try:
