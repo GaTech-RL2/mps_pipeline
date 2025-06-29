@@ -87,7 +87,7 @@ setup_commands:
   - sudo systemctl enable --now crond
   - |
       (crontab -l 2>/dev/null | grep -v run_daily_mps.py ; \
-       echo "CRON_TZ=America/New_York" ; \
-       echo "50 22 * * * PATH=/usr/local/bin:/usr/bin:/bin /usr/bin/python3 /home/ec2-user/mps_pipeline/run_daily_mps.py >> /var/log/mps_daily.log 2>&1") \
-       | crontab -
+       echo 'CRON_TZ=America/New_York' ; \
+       echo '10 15 * * * PATH=/usr/local/bin:/usr/bin:/bin /usr/bin/python3 /home/ec2-user/mps_pipeline/run_daily_mps.py >> /home/ec2-user/mps_daily.log 2>&1' \
+      ) | crontab -
   - crontab -l
