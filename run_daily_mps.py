@@ -17,7 +17,9 @@ import ray
 
 RAW_ROOT = Path("/mnt/raw")
 TOKEN = (
-    "FRLAbl7E..."  # ← keep your long token exactly as-is
+    "FRLAbl7Eqw5g4upZCoow1ht3YE9e16ue9iLTv13IpnXXxxt8gR5BXrqkuj6deunEcnDAUMNjylAZAv"
+    "SKzZB6PB2amlGFec8dyuvpaZAtZB0hxxzRRHgoy9gdZChM8lUDalGDP1q8VPoszMZBLiYoif0Q9aL49"
+    "Ewn0mXUEVd3gHBW74yAwZD"
 )
 
 def ensure_token():
