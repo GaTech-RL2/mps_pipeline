@@ -47,7 +47,7 @@ available_node_types:
           Ebs: { VolumeSize: 50 }
     resources: { CPU: 4 }
     min_workers: 0
-    max_workers: 15
+    max_workers: 20
 
 head_node_type: head_node
 
@@ -88,6 +88,6 @@ setup_commands:
   - |
       (crontab -l 2>/dev/null | grep -v run_daily_mps.py ; \
        echo 'CRON_TZ=America/New_York' ; \
-       echo '30 16 * * * PATH=/usr/local/bin:/usr/bin:/bin /usr/bin/python3 /home/ec2-user/mps_pipeline/run_daily_mps.py >> /home/ec2-user/mps_daily.log 2>&1' \
+       echo '30 12 * * * PATH=/usr/local/bin:/usr/bin:/bin /usr/bin/python3 /home/ec2-user/mps_pipeline/run_daily_mps.py >> /home/ec2-user/mps_daily.log 2>&1' \
       ) | crontab -
   - crontab -l
