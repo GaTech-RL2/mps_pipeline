@@ -28,7 +28,7 @@ def ensure_token():
         dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_text(TOKEN)
 
-@ray.remote(num_cpus=8, memory=24 * 1024 ** 3)
+@ray.remote(num_cpus=6, memory=24 * 1024 ** 3)
 def run_mps_on_folder(folder: str) -> dict:
     try:
         ensure_token()
