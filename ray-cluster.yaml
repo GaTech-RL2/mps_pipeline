@@ -45,7 +45,9 @@ available_node_types:
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs: { VolumeSize: 50 }
-    resources: { CPU: 8 }
+    resources:
+      CPU: 8
+      memory: 34359738368
     min_workers: 0
     max_workers: 15
 
