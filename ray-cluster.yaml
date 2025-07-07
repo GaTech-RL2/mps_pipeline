@@ -74,8 +74,9 @@ setup_commands:
         sudo mount-s3 \
           s3://rldb/raw/ /mnt/raw \
           --allow-other \
-          --uid=0 \
-          --gid=0 \
+          --allow-delete \
+          --uid=$(id -u ec2-user) \
+          --gid=$(id -g ec2-user) \
           --file-mode=777 --dir-mode=777
       fi
   - |
