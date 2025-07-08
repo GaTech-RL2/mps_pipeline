@@ -64,7 +64,11 @@ initialization_commands:
   - sudo pip3 install projectaria-tools
   - sudo pip3 install boto3
   - sudo pip3 install moviepy==1.0.3
-  - sudo pip3 install ffmpeg
+  - curl -L https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz -o ffmpeg.tar.xz
+  - tar -xf ffmpeg.tar.xz
+  - sudo cp ffmpeg-*-amd64-static/ffmpeg /usr/local/bin/
+  - sudo chmod +x /usr/local/bin/ffmpeg
+  - ffmpeg -version || echo "❌ ffmpeg failed to install"
   - sudo yum install -y git
 
 setup_commands:
@@ -102,6 +106,6 @@ setup_commands:
   - |
       (crontab -l 2>/dev/null | grep -v run_daily_mps.py ; \
        echo 'CRON_TZ=America/New_York' ; \
-       echo '30 21 * * * PATH=/usr/local/bin:/usr/bin:/bin /usr/bin/python3 /home/ec2-user/mps_pipeline/run_daily_mps.py >> /home/ec2-user/mps_daily.log 2>&1' \
+       echo '0 19 * * * PATH=/usr/local/bin:/usr/bin:/bin /usr/bin/python3 /home/ec2-user/mps_pipeline/run_daily_mps.py >> /home/ec2-user/mps_daily.log 2>&1' \
       ) | crontab -
   - crontab -l

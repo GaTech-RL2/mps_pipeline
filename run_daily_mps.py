@@ -31,9 +31,12 @@ def ensure_token():
 @ray.remote(num_cpus=4, memory=16 * 1024 ** 3)
 def convert_vrs_to_mp4(vrs_path: str) -> dict:
     try:
-        mp4_path = str(Path(vrs_path).with_suffix(".mp4"))
+        mp4_path = Path(vrs_path).with_suffix(".mp4")
+        if mp4_path.exists():
+            return {"vrs": vrs_path, "status": "skipped"}
+
         subprocess.run(
-            ["vrs_to_mp4", "--vrs", vrs_path, "--output_video", mp4_path],
+            ["vrs_to_mp4", "--vrs", str(vrs_path), "--output_video", str(mp4_path)],
             check=True,
         )
         return {"vrs": vrs_path, "status": "ok"}
@@ -103,6 +106,8 @@ def main() -> None:
         ts = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         if res["status"] == "ok":
             print(f"[{ts}] ✓ Converted {res['vrs']}")
+        elif res["status"] == "skipped":
+            print(f"[{ts}] ↷ Skipped (already exists) {res['vrs']}")
         else:
             print(f"[{ts}] ✗ Failed to convert {res['vrs']} :: {res['err']}")
             print(res["trace"])
