@@ -28,6 +28,18 @@ def ensure_token():
         dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_text(TOKEN)
 
+@ray.remote(num_cpus=4, memory=16 * 1024 ** 3)
+def convert_vrs_to_mp4(vrs_path: str) -> dict:
+    try:
+        mp4_path = str(Path(vrs_path).with_suffix(".mp4"))
+        subprocess.run(
+            ["vrs_to_mp4", "--vrs", vrs_path, "--output_video", mp4_path],
+            check=True,
+        )
+        return {"vrs": vrs_path, "status": "ok"}
+    except Exception as exc:
+        return {"vrs": vrs_path, "status": "err", "err": str(exc), "trace": traceback.format_exc(limit=2)}
+
 @ray.remote(num_cpus=8, memory=32 * 1024 ** 3)
 def run_mps_on_folder(folder: str) -> dict:
     try:
@@ -68,14 +80,34 @@ def main() -> None:
 
     folders = discover_subfolders()
 
-    if args.debug:                       # ===== DRY-RUN =====
+    if args.debug:  # ===== DRY-RUN =====
         print("DEBUG MODE – nothing will run")
         for f in folders:
             print(" would process:", f)
         sys.exit(0)
 
-    # ===== REAL RUN =====
+    # ===== RAY INIT =====
     ray.init(address="auto")
+
+    # ===== VRS TO MP4 CONVERSIONS =====
+    vrs_files = []
+    for folder in folders:
+        vrs_files.extend(Path(folder).glob("*.vrs"))
+
+    print(f"Discovered {len(vrs_files)} .vrs files, dispatching conversion tasks...")
+    futures = [convert_vrs_to_mp4.remote(str(vrs)) for vrs in vrs_files]
+    pending = set(futures)
+    while pending:
+        ready, pending = ray.wait(list(pending), num_returns=1)
+        res = ray.get(ready[0])
+        ts = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        if res["status"] == "ok":
+            print(f"[{ts}] ✓ Converted {res['vrs']}")
+        else:
+            print(f"[{ts}] ✗ Failed to convert {res['vrs']} :: {res['err']}")
+            print(res["trace"])
+
+    # ===== MPS JOBS =====
     launch_jobs(folders)
 
 if __name__ == "__main__":

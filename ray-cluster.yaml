@@ -63,7 +63,7 @@ initialization_commands:
   - sudo pip3 install ray
   - sudo pip3 install projectaria-tools
   - sudo pip3 install boto3
-  - sudo pip3 install moviepy
+  - sudo pip3 install moviepy==1.0.3
   - sudo pip3 install ffmpeg
   - sudo yum install -y git
 
