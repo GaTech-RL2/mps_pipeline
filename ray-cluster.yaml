@@ -63,6 +63,8 @@ initialization_commands:
   - sudo pip3 install ray
   - sudo pip3 install projectaria-tools
   - sudo pip3 install boto3
+  - sudo pip3 install moviepy
+  - sudo pip3 install ffmpeg
   - sudo yum install -y git
 
 setup_commands:
@@ -75,9 +77,18 @@ setup_commands:
           s3://rldb/raw/ /mnt/raw \
           --allow-other \
           --allow-delete \
+          --allow-overwrite \
           --uid=$(id -u ec2-user) \
           --gid=$(id -g ec2-user) \
           --file-mode=777 --dir-mode=777
+      fi  
+  - |
+      echo "running write-delete test..."
+      echo "test123" > /mnt/raw/__write_delete_test.txt
+      if rm /mnt/raw/__write_delete_test.txt; then
+        echo "✅ write-delete test passed"
+      else
+        echo "❌ write-delete test failed"
       fi
   - |
       if [ ! -d ~/mps_pipeline ]; then
