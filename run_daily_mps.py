@@ -12,6 +12,7 @@ import subprocess
 import sys
 import traceback
 from pathlib import Path
+import shutil
 
 import ray
 
@@ -35,10 +36,12 @@ def convert_vrs_to_mp4(vrs_path: str) -> dict:
         if mp4_path.exists():
             return {"vrs": vrs_path, "status": "skipped"}
 
+        tmp_output = Path("/tmp") / mp4_path.name
         subprocess.run(
-            ["vrs_to_mp4", "--vrs", str(vrs_path), "--output_video", str(mp4_path)],
+            ["vrs_to_mp4", "--vrs", str(vrs_path), "--output_video", str(tmp_output)],
             check=True,
         )
+        shutil.move(str(tmp_output), str(mp4_path))  # move final mp4 to /mnt/raw
         return {"vrs": vrs_path, "status": "ok"}
     except Exception as exc:
         return {"vrs": vrs_path, "status": "err", "err": str(exc), "trace": traceback.format_exc(limit=2)}
