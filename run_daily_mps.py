@@ -38,10 +38,19 @@ def convert_vrs_to_mp4(vrs_path: str) -> dict:
 
         tmp_output = Path("/tmp") / mp4_path.name
         print(f"[convert] Running vrs_to_mp4 on {vrs_path} → temp: {tmp_output}")
-        subprocess.run(
+
+        result = subprocess.run(
             ["vrs_to_mp4", "--vrs", str(vrs_path), "--output_video", str(tmp_output)],
-            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
         )
+
+        if result.returncode != 0:
+            print(f"[convert] ❌ vrs_to_mp4 failed for {vrs_path}")
+            print(f"[convert] --- STDOUT ---\n{result.stdout}")
+            print(f"[convert] --- STDERR ---\n{result.stderr}")
+            raise subprocess.CalledProcessError(result.returncode, result.args, output=result.stdout, stderr=result.stderr)
 
         print(f"[convert] Moving {tmp_output} → {mp4_path}")
         shutil.move(str(tmp_output), str(mp4_path))
@@ -60,7 +69,7 @@ def convert_vrs_to_mp4(vrs_path: str) -> dict:
             "err": str(exc),
             "trace": traceback.format_exc(limit=2),
         }
-
+        
 @ray.remote(num_cpus=8, memory=32 * 1024 ** 3)
 def run_mps_on_folder(folder: str) -> dict:
     try:
