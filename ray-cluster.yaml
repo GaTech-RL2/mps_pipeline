@@ -67,8 +67,10 @@ initialization_commands:
   - curl -L https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz -o ffmpeg.tar.xz
   - tar -xf ffmpeg.tar.xz
   - sudo cp ffmpeg-*-amd64-static/ffmpeg /usr/local/bin/
-  - sudo chmod +x /usr/local/bin/ffmpeg
+  - sudo cp ffmpeg-*-amd64-static/ffprobe /usr/local/bin/    # ✅ ffprobe
+  - sudo chmod +x /usr/local/bin/ffmpeg /usr/local/bin/ffprobe
   - ffmpeg -version || echo "❌ ffmpeg failed to install"
+  - ffprobe -version || echo "❌ ffprobe failed to install"
   - sudo yum install -y git
 
 setup_commands:

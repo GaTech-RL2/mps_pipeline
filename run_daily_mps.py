@@ -52,8 +52,12 @@ def convert_vrs_to_mp4(vrs_path: str) -> dict:
             print(f"[convert] --- STDERR ---\n{result.stderr}")
             raise subprocess.CalledProcessError(result.returncode, result.args, output=result.stdout, stderr=result.stderr)
 
-        print(f"[convert] Moving {tmp_output} → {mp4_path}")
-        shutil.move(str(tmp_output), str(mp4_path))
+        print(f"[convert] Copying {tmp_output} → {mp4_path} (cross-device safe)")
+        with open(tmp_output, "rb") as src_f, open(mp4_path, "wb") as dst_f:
+            shutil.copyfileobj(src_f, dst_f)
+
+        os.remove(tmp_output)
+        print(f"[convert] ✅ Copy succeeded and temp file removed")
 
         if mp4_path.exists():
             print(f"[convert] ✅ Move succeeded: {mp4_path}")
