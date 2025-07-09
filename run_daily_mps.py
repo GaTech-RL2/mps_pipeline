@@ -37,14 +37,29 @@ def convert_vrs_to_mp4(vrs_path: str) -> dict:
             return {"vrs": vrs_path, "status": "skipped"}
 
         tmp_output = Path("/tmp") / mp4_path.name
+        print(f"[convert] Running vrs_to_mp4 on {vrs_path} → temp: {tmp_output}")
         subprocess.run(
             ["vrs_to_mp4", "--vrs", str(vrs_path), "--output_video", str(tmp_output)],
             check=True,
         )
-        shutil.move(str(tmp_output), str(mp4_path))  # move final mp4 to /mnt/raw
+
+        print(f"[convert] Moving {tmp_output} → {mp4_path}")
+        shutil.move(str(tmp_output), str(mp4_path))
+
+        if mp4_path.exists():
+            print(f"[convert] ✅ Move succeeded: {mp4_path}")
+        else:
+            print(f"[convert] ❌ Move failed: {mp4_path} not found after move")
+
         return {"vrs": vrs_path, "status": "ok"}
+
     except Exception as exc:
-        return {"vrs": vrs_path, "status": "err", "err": str(exc), "trace": traceback.format_exc(limit=2)}
+        return {
+            "vrs": vrs_path,
+            "status": "err",
+            "err": str(exc),
+            "trace": traceback.format_exc(limit=2),
+        }
 
 @ray.remote(num_cpus=8, memory=32 * 1024 ** 3)
 def run_mps_on_folder(folder: str) -> dict:
