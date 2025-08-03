@@ -13,6 +13,8 @@ import sys
 import traceback
 from pathlib import Path
 import shutil
+from moviepy.editor import VideoFileClip
+from PIL import Image
 
 import ray
 
@@ -28,6 +30,29 @@ def ensure_token():
     if not dst.exists():
         dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_text(TOKEN)
+        
+@ray.remote(num_cpus=4, memory=16 * 1024 ** 3)
+def save_thumbnail_from_mp4(mp4_path: str) -> dict:
+    try:
+        mp4_path = Path(mp4_path)
+        thumb_path = mp4_path.with_suffix(".jpg")
+
+        if thumb_path.exists():
+            return {"mp4": str(mp4_path), "status": "skipped"}
+
+        with VideoFileClip(str(mp4_path)) as clip:
+            frame = clip.get_frame(5.0)  # e.g., frame at 5 seconds
+            image = Image.fromarray(frame)
+            image.save(thumb_path, quality=90)
+
+        return {"mp4": str(mp4_path), "status": "ok"}
+    except Exception as exc:
+        return {
+            "mp4": mp4_path,
+            "status": "err",
+            "err": str(exc),
+            "trace": traceback.format_exc(limit=2),
+        }
 
 @ray.remote(num_cpus=4, memory=16 * 1024 ** 3)
 def convert_vrs_to_mp4(vrs_path: str) -> dict:
@@ -141,6 +166,24 @@ def main() -> None:
             print(f"[{ts}] ↷ Skipped (already exists) {res['vrs']}")
         else:
             print(f"[{ts}] ✗ Failed to convert {res['vrs']} :: {res['err']}")
+            print(res["trace"])
+            
+    # ===== GENERATE THUMBNAILS =====
+    mp4_files = [str(Path(vrs).with_suffix(".mp4")) for vrs in vrs_files]
+    print(f"Dispatching thumbnail generation tasks for {len(mp4_files)} mp4s...")
+
+    thumb_futures = [save_thumbnail_from_mp4.remote(mp4) for mp4 in mp4_files]
+    pending = set(thumb_futures)
+    while pending:
+        ready, pending = ray.wait(list(pending), num_returns=1)
+        res = ray.get(ready[0])
+        ts = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        if res["status"] == "ok":
+            print(f"[{ts}] 🖼️ Saved thumbnail for {res['mp4']}")
+        elif res["status"] == "skipped":
+            print(f"[{ts}] ↷ Skipped thumbnail (already exists) {res['mp4']}")
+        else:
+            print(f"[{ts}] ✗ Failed to generate thumbnail for {res['mp4']} :: {res['err']}")
             print(res["trace"])
 
     # ===== MPS JOBS =====

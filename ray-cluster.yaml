@@ -72,6 +72,7 @@ initialization_commands:
   - ffmpeg -version || echo "❌ ffmpeg failed to install"
   - ffprobe -version || echo "❌ ffprobe failed to install"
   - sudo yum install -y git
+  - sudo pip3 install Pillow
 
 setup_commands:
   - sudo mkdir -p /mnt/raw
@@ -108,6 +109,6 @@ setup_commands:
   - |
       (crontab -l 2>/dev/null | grep -v run_daily_mps.py ; \
        echo 'CRON_TZ=America/New_York' ; \
-       echo '30 19 * * * PATH=/usr/local/bin:/usr/bin:/bin /usr/bin/python3 /home/ec2-user/mps_pipeline/run_daily_mps.py >> /home/ec2-user/mps_daily.log 2>&1' \
+       echo '30 18 * * * PATH=/usr/local/bin:/usr/bin:/bin /usr/bin/python3 /home/ec2-user/mps_pipeline/run_daily_mps.py >> /home/ec2-user/mps_daily.log 2>&1' \
       ) | crontab -
   - crontab -l
