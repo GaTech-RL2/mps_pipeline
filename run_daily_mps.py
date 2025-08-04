@@ -31,24 +31,23 @@ def ensure_token():
         dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_text(TOKEN)
         
-@ray.remote(num_cpus=4, memory=16 * 1024 ** 3)
+@ray.remote(num_cpus=2, memory=4 * 1024 ** 3)
 def save_thumbnail_from_mp4(mp4_path: str) -> dict:
     try:
         mp4_path = Path(mp4_path)
         thumb_path = mp4_path.with_suffix(".jpg")
-
         if thumb_path.exists():
             return {"mp4": str(mp4_path), "status": "skipped"}
 
         with VideoFileClip(str(mp4_path)) as clip:
-            frame = clip.get_frame(5.0)  # e.g., frame at 5 seconds
+            frame = clip.get_frame(5.0)
             image = Image.fromarray(frame)
             image.save(thumb_path, quality=90)
 
         return {"mp4": str(mp4_path), "status": "ok"}
     except Exception as exc:
         return {
-            "mp4": mp4_path,
+            "mp4": str(mp4_path),
             "status": "err",
             "err": str(exc),
             "trace": traceback.format_exc(limit=2),
@@ -169,11 +168,15 @@ def main() -> None:
             print(res["trace"])
             
     # ===== GENERATE THUMBNAILS =====
-    mp4_files = [str(Path(vrs).with_suffix(".mp4")) for vrs in vrs_files]
-    print(f"Dispatching thumbnail generation tasks for {len(mp4_files)} mp4s...")
+    print(f"Globbing *.mp4 files from folders for thumbnail generation...")
+    all_mp4s = []
+    for folder in folders:
+        all_mp4s.extend(Path(folder).glob("*.mp4"))
 
-    thumb_futures = [save_thumbnail_from_mp4.remote(mp4) for mp4 in mp4_files]
+    print(f"Found {len(all_mp4s)} mp4s, dispatching thumbnail tasks…")
+    thumb_futures = [save_thumbnail_from_mp4.remote(str(mp4)) for mp4 in all_mp4s]
     pending = set(thumb_futures)
+
     while pending:
         ready, pending = ray.wait(list(pending), num_returns=1)
         res = ray.get(ready[0])
@@ -185,7 +188,6 @@ def main() -> None:
         else:
             print(f"[{ts}] ✗ Failed to generate thumbnail for {res['mp4']} :: {res['err']}")
             print(res["trace"])
-
     # ===== MPS JOBS =====
     launch_jobs(folders)
 
