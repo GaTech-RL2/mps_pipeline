@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-run_daily_mps.py – ALWAYS processes every /mnt/raw/<folder>
-  • normal call: launches Ray jobs immediately
-  • --debug: dry-run (lists the folders, no work)
-  • Single-node Ray: spins up one large local Ray node
+run_daily_mps.py – processes /mnt/raw/aria
+  • normal call: launches one Ray job on /mnt/raw/aria
+  • --debug: dry-run (lists the files in /mnt/raw/aria, no work)
+  • Single-node Ray: spins up one local Ray node
 """
 
 import argparse
@@ -17,6 +17,8 @@ from pathlib import Path
 import ray
 
 RAW_ROOT = Path("/mnt/raw")
+ARIA_DIR = RAW_ROOT / "aria"
+
 TOKEN = (
     "FRLAbl7Eqw5g4upZCoow1ht3YE9e16ue9iLTv13IpnXXxxt8gR5BXrqkuj6deunEcnDAUMNjylAZAv"
     "SKzZB6PB2amlGFec8dyuvpaZAtZB0hxxzRRHgoy9gdZChM8lUDalGDP1q8VPoszMZBLiYoif0Q9aL49"
@@ -63,12 +65,8 @@ interval = 4 # Interval between runs
 retries = 3 # Number of times to retry a failed upload
 """
 
-
 def ensure_token_and_config():
-    """
-    Ensures both the ProjectAria token and mps.ini configuration exist
-    on the local node (each Ray worker runs this).
-    """
+    """Ensure ProjectAria token and mps.ini exist on the local node (head & workers)."""
     projectaria_dir = Path.home() / ".projectaria"
     projectaria_dir.mkdir(parents=True, exist_ok=True)
 
@@ -79,9 +77,16 @@ def ensure_token_and_config():
     ini_path = projectaria_dir / "mps.ini"
     ini_path.write_text(MPS_INI_CONTENT)
 
+def discover_input_dir() -> str:
+    """Return the single input directory: /mnt/raw/aria (error if missing)."""
+    if not RAW_ROOT.exists():
+        raise RuntimeError(f"{RAW_ROOT} does not exist or is not mounted?")
+    if not ARIA_DIR.exists() or not ARIA_DIR.is_dir():
+        raise RuntimeError(f"{ARIA_DIR} does not exist or is not a directory")
+    return str(ARIA_DIR)
 
 @ray.remote
-def run_mps_on_folder(folder: str) -> dict:
+def run_mps_on_dir(folder: str) -> dict:
     try:
         ensure_token_and_config()
         subprocess.run(
@@ -97,40 +102,39 @@ def run_mps_on_folder(folder: str) -> dict:
             "trace": traceback.format_exc(limit=3),
         }
 
-
-def discover_subfolders() -> list[str]:
-    if not RAW_ROOT.exists():
-        raise RuntimeError(f"{RAW_ROOT} does not exist or is not mounted?")
-    return [str(p) for p in RAW_ROOT.iterdir() if p.is_dir()]
-
-
-def launch_jobs(folders: list[str]) -> None:
-    print(f"Launching {len(folders)} parallel MPS jobs …")
-    futures = [run_mps_on_folder.remote(f) for f in folders]
-    pending = set(futures)
-    while pending:
-        ready, pending = ray.wait(list(pending), num_returns=1)
-        res = ray.get(ready[0])
-        ts = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        if res["status"] == "ok":
-            print(f"[{ts}] ✓ {res['folder']}")
-        else:
-            print(f"[{ts}] ✗ {res['folder']} :: {res['err']}")
-            print(res["trace"])
-
+def launch_job(input_dir: str) -> None:
+    print(f"Launching MPS on {input_dir} …")
+    fut = run_mps_on_dir.remote(input_dir)
+    ready, _ = ray.wait([fut], num_returns=1)
+    res = ray.get(ready[0])
+    ts = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    if res["status"] == "ok":
+        print(f"[{ts}] ✓ {res['folder']}")
+    else:
+        print(f"[{ts}] ✗ {res['folder']} :: {res['err']}")
+        print(res["trace"])
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--debug", action="store_true",
-                        help="Dry-run: list folders only, no work")
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Dry-run: list files in /mnt/raw/aria (no work)",
+    )
     args = parser.parse_args()
 
-    folders = discover_subfolders()
+    input_dir = discover_input_dir()
 
     if args.debug:
-        print("DEBUG MODE – nothing will run")
-        for f in folders:
-            print(" would process:", f)
+        print("DEBUG MODE – listing entries in /mnt/raw/aria (no work)")
+        p = Path(input_dir)
+        entries = sorted(p.iterdir())
+        if not entries:
+            print("  (empty)")
+        else:
+            for e in entries:
+                kind = "file " if e.is_file() else "dir  "
+                print(f"  {kind} {e}")
         sys.exit(0)
 
     # Initialize Ray on single local node
@@ -139,9 +143,8 @@ def main() -> None:
     # Ensure config on head node too
     ensure_token_and_config()
 
-    # Launch MPS jobs
-    launch_jobs(folders)
-
+    # Launch MPS job
+    launch_job(input_dir)
 
 if __name__ == "__main__":
     main()

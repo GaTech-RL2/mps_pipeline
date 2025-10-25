@@ -81,7 +81,7 @@ setup_commands:
         echo "/mnt/raw already mounted"
       else
         sudo mount-s3 \
-          s3://rldb/raw_v2/aria/ /mnt/raw \
+          s3://rldb/raw_v2/ /mnt/raw \
           --allow-other \
           --allow-delete \
           --allow-overwrite \
@@ -103,11 +103,11 @@ setup_commands:
       else
         git -C ~/mps_pipeline pull --ff-only
       fi
-  - chmod +x ~/mps_pipeline/run_daily_mps.py
+  - chmod +x ~/mps_pipeline/run_daily_mps_v2.py
   - sudo dnf install -y cronie
   - sudo systemctl enable --now crond
   - |
-      (crontab -l 2>/dev/null | grep -v run_daily_mps.py ; \
+      (crontab -l 2>/dev/null | grep -v run_daily_mps_v2.py ; \
        echo 'CRON_TZ=America/New_York' ; \
        echo '0 20 * * * PATH=/usr/local/bin:/usr/bin:/bin /usr/bin/python3 /home/ec2-user/mps_pipeline/run_daily_mps_v2.py >> /home/ec2-user/mps_daily.log 2>&1' \
       ) | crontab -
