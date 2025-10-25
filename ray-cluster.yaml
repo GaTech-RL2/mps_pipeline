@@ -81,7 +81,7 @@ setup_commands:
         echo "/mnt/raw already mounted"
       else
         sudo mount-s3 \
-          s3://rldb/raw_v2/aria /mnt/raw \
+          s3://rldb/raw_v2/aria/ /mnt/raw \
           --allow-other \
           --allow-delete \
           --allow-overwrite \
