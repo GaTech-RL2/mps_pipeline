@@ -77,6 +77,16 @@ def ensure_token_and_config():
     ini_path = projectaria_dir / "mps.ini"
     ini_path.write_text(MPS_INI_CONTENT)
 
+def prepare_tmp_on_raw():
+    """Force temp files to /mnt/raw/.tmp to avoid cross-device rename/copy metadata issues."""
+    tmp = RAW_ROOT / ".tmp"
+    tmp.mkdir(parents=True, exist_ok=True)
+    os.environ["TMPDIR"] = str(tmp)
+    os.environ["TMP"] = str(tmp)
+    os.environ["TEMP"] = str(tmp)
+    # Best-effort: disable preserving file times in stdlib paths that honor it (Py 3.12+)
+    os.environ["PYTHONPRESERVEFILETIMES"] = "0"
+
 def discover_input_dir() -> str:
     """Return the single input directory: /mnt/raw/aria (error if missing)."""
     if not RAW_ROOT.exists():
@@ -89,6 +99,7 @@ def discover_input_dir() -> str:
 def run_mps_on_dir(folder: str) -> dict:
     try:
         ensure_token_and_config()
+        prepare_tmp_on_raw()
         subprocess.run(
             ["aria_mps", "single", "-i", folder, "--no-ui", "--retry-failed"],
             check=True,
@@ -140,8 +151,9 @@ def main() -> None:
     # Initialize Ray on single local node
     ray.init()
 
-    # Ensure config on head node too
+    # Ensure config on head node too and set tmp on head (some tools use it)
     ensure_token_and_config()
+    prepare_tmp_on_raw()
 
     # Launch MPS job
     launch_job(input_dir)
