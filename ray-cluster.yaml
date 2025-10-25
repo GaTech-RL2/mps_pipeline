@@ -61,7 +61,7 @@ initialization_commands:
   - mount-s3 --version
   - sudo dnf install -y fuse3 fuse3-libs --allowerasing
   - sudo pip3 install ray
-  - sudo pip3 install projectaria-tools
+  - sudo pip3 install projectaria-tools==1.6.0
   - sudo pip3 install boto3
   - sudo pip3 install moviepy==1.0.3
   - curl -L https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz -o ffmpeg.tar.xz
